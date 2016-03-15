@@ -1,0 +1,29 @@
+
+ChangeLinkColor('a1','Programs/KQ/EmployeeInfoStatistic.aspx','Programs/KQ/HelpEmployeeInfoStatistic.aspx')
+ChangeLinkColor('a2','Programs/KQ/EmployeeInfoDetail.aspx','Programs/KQ/HelpEmployeeInfoDetail.aspx')
+ChangeLinkColor('a4','Programs/KQ/EmployeeRequestOvertime.aspx','Programs/KQ/HelpEmployeeRequestOvertime.aspx')
+
+考勤统计
+http://oa-center.storm/Programs/KQ/EmployeeInfoStatistic.aspx
+  刷卡信息：
+  InfoSelect=RadioButtonPUNCH_CARD_INFO
+  请假信息：
+  InfoSelect=RadioButtonLEAVE_INFO
+  加班、出差、外出信息：
+  InfoSelect=RadioButtonOVERTIME_INFO
+  ---------------------
+  本月：
+  TimeSelect=RadioButtonTHIS_MONTH
+  上月：
+  TimeSelect=RadioButtonPREV_MONTH
+  其他日期：
+  TimeSelect=RadioButtonDATE_SELECT
+  TextBoxDATE_FROM=2016-03-01
+  TextBoxDATE_TO=2016-03-31
+信息详细
+http://oa-center.storm/Programs/KQ/EmployeeInfoDetail.aspx
+
+加班申请
+http://oa-center.storm/Programs/KQ/EmployeeRequestOvertime.aspx
+记录查找
+EmployeeRequestOvertime.aspx
