@@ -5,7 +5,7 @@ Created on Mon Mar 14 17:35:47 2016
 @author: navicloud
 """
 import urllib2
-import lxml, bs4
+import lxml
 from PyQt4 import QtCore, QtGui
 import yuedlg_ui
 import yue
@@ -27,24 +27,12 @@ class YueDlg(QtGui.QDialog, yuedlg_ui.Ui_Dialog):
     @QtCore.pyqtSignature('')
     def on_pushButton_clicked(self):
         url = unicode(self.leUrl.text())
-        #page = urllib2.urlopen(url)
         page = self.yue.Open(url)
-        content = page.read()
-        charset = page.headers.getparam('charset')
-        if not charset:
-            doc = bs4.UnicodeDammit(content, is_html=True)
-            charset = doc.original_encoding
-        print charset
-        if charset:
-            content = content.decode(charset) #content = QtCore.QString.fromUtf8(content)
-        else:
-            print '<Unknown charset>'
+        content = self.yue.GetPageContent(page)
         self.setText(content)
 
     def setText(self,text):
         self.htmlBrowser.setText(text)
-        #self.textEdit.setText(text)
-        #self.webView.setHtml(text)
 
 def main():
     import sys
