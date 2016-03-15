@@ -20,19 +20,15 @@ class Yue(object):
                ,'btnLogin':''
                }
       #url = self.urlOpener.open(loginPage)
-      url = self.Post(loginPage, values)
-      page = url.read()
-      res  = True
-      if 'MainWindow.aspx' in page:
-        print 'Login Succeeded!'
-      else:
-        res = False
-        print 'Login Failed...\n', page
-      return res
+      content = self.Post(loginPage, values)
+      return content
+
+    def IsLoginSucceed(self, content):
+        return 'MainWindow.aspx' in content
 
     def Open(self,url):
         page = self.urlOpener.open(url)
-        return page
+        return self.GetPageContent(page)
 
     def Post(self, url, data=None):
         if not data:
@@ -47,7 +43,7 @@ class Yue(object):
         #request.add_header('Accept-Encoding', 'gzip, deflate')
         #request.add_header('Accept-Language', 'zh-CN,zh;q=0.8')
         page = self.urlOpener.open(request)  # Our cookiejar automatically receives the cookies
-        return page
+        return self.GetPageContent(page)
 
     def GetPageContent(self, page):
         content = page.read()

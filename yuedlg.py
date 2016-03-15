@@ -16,22 +16,25 @@ class YueDlg(QtGui.QDialog, yuedlg_ui.Ui_Dialog):
         self.setupUi(self)
 
         self.htmlBrowser.setOpenExternalLinks(True)
-        self.setText('''<table cellpadding="4" cellspacing="0"
+        """self.assignText('''<table cellpadding="4" cellspacing="0"
         style="border-width:1px;border-style:solid;border-color:red;">
         <tr><td>hello</td><td><a href="http://www.baidu.com/">Baidu</a></td></tr>
         <tr><td>hello</td><td><font color="red">world</font></td></tr>
-        </table>''')
+        </table>''')"""
         self.yue = yue.Yue()
-        self.yue.Login('2797', 'venus190597')
+        content = self.yue.Login('2797', 'venus190597')
+        if self.yue.IsLoginSucceed(content):
+            self.assignText('<h2><font color="green">Login Successfully.</font></h2>')
+        else:
+            self.assignText(content)
 
     @QtCore.pyqtSignature('')
     def on_pushButton_clicked(self):
         url = unicode(self.leUrl.text())
-        page = self.yue.Open(url)
-        content = self.yue.GetPageContent(page)
-        self.setText(content)
+        content = self.yue.Open(url)
+        self.assignText(content)
 
-    def setText(self,text):
+    def assignText(self,text):
         self.htmlBrowser.setText(text)
 
 def main():
