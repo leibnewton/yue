@@ -33,8 +33,7 @@ class Yue(object):
     def Post(self, url, data=None):
         if not data:
             return self.Open(url)
-        if not type(data) is str:
-            data = urllib.urlencode(data)
+        data = urllib.urlencode(data)
         request = urllib2.Request(url, data)
         # These headers are not requisite, but for the sake of security.
         request.add_header('User-Agent', 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/46.0.2490.80 Safari/537.36')
