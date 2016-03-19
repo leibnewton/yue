@@ -20,15 +20,16 @@ class StateExtracter(HTMLParser.HTMLParser):
         if tag == 'input':
             dattrs = dict(attrs)
             try:
-                #print '  ', dattrs['name'],
-                if dattrs['name'] == StateExtracter.VIEWSTATE:
-                    self.__result[StateExtracter.VIEWSTATE] = dattrs['value']
-                    #print len(dattrs['value']),
-                #print
+                if dattrs['type'] not in ('submit', 'button'):
+                    self.__result[str(dattrs['name'])] = str(dattrs['value']) #filter not ascii
             except: pass
 
     def GetResult(self, key):
         return self.__result.get(key, '')
+
+    @property
+    def result(self): # provide shallow copy
+        return dict(self.__result)
 
 class Yue(object):
     ORIGIN = 'http://172.26.10.41' #"http://oa-center.storm"  #
@@ -40,27 +41,33 @@ class Yue(object):
         self.urlOpener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
 
     def Login(self,usr,pwd):
-      loginPage = Yue.ORIGIN + "/Programs/login/login.aspx"
+      loginPage = urljoin(Yue.ORIGIN, "/Programs/login/login.aspx")
       values = {'tbUserName' :usr
                ,'tbPassword' :pwd
                ,'btnLogin':''}
-      content = self.Post(loginPage, values)
+      content = self._Post(loginPage, values)
       return content
 
     def IsLoginSucceed(self, content):
         return 'MainWindow.aspx' in content
 
     def SetViewState(self, url, data):
-        url, stateKey = self.RegulateUrl(url)
+        stateKey = self.RegulateUrl(url)[1]
         if not Yue.ViewStates.has_key(stateKey):
-            content = self.Open(url)
-            self.__stateExtracter.feed(content)
-            Yue.ViewStates[stateKey] = self.__stateExtracter.GetResult(StateExtracter.VIEWSTATE)
-        #print 'length of viewstate of %s: %d' % (stateKey, len(Yue.ViewStates[stateKey]))
-        state = Yue.ViewStates[stateKey]
-        if state: # set VIEWSTATE
-            data[StateExtracter.VIEWSTATE] = state
-        return url
+            content = self._Open(url)
+            self.UpdateViewState(url, content)
+        value = Yue.ViewStates[stateKey]
+        if value: # set VIEWSTATE
+            data[StateExtracter.VIEWSTATE] = value
+
+    def UpdateViewState(self, url, content):
+        self.__stateExtracter.feed(content)
+        stateKey = self.RegulateUrl(url)[1]
+        value = self.__stateExtracter.GetResult(StateExtracter.VIEWSTATE)
+        if value:
+            origlen = len(Yue.ViewStates.get(stateKey, ''))
+            Yue.ViewStates[stateKey] = value
+            print '%s viewstate: %d -> %d' % (stateKey, origlen, len(value))
 
     def RegulateUrl(self, url):
         o = urlparse(url)
@@ -69,14 +76,21 @@ class Yue(object):
         url = urljoin(Yue.ORIGIN, o.path)
         return (url, o.path)
 
-    def Open(self,url):
-        page = self.urlOpener.open(self.RegulateUrl(url)[0])
-        return self.GetPageContent(page)
-
-    def Post(self, url, data=None):
+    def Fetch(self, url, data=None):
+        url = self.RegulateUrl(url)[0]
         if not data:
-            return self.Open(url)
-        url = self.SetViewState(url, data)
+            return self._Open(url)
+        else:
+            return self._Post(url, data)
+
+    def _Open(self,url):
+        page = self.urlOpener.open(url)
+        content = self.GetPageContent(page)
+        return content
+
+    def _Post(self, url, data):
+        if not data.has_key(StateExtracter.VIEWSTATE):
+            self.SetViewState(url, data)
         data = urllib.urlencode(data)
         request = urllib2.Request(url, data)
         # These headers are not requisite, but for the sake of security.
@@ -86,7 +100,9 @@ class Yue(object):
         #request.add_header('Accept-Encoding', 'gzip, deflate')
         #request.add_header('Accept-Language', 'zh-CN,zh;q=0.8')
         page = self.urlOpener.open(request)  # Our cookiejar automatically receives the cookies
-        return self.GetPageContent(page)
+        content = self.GetPageContent(page)
+        #self.UpdateViewState(url, content)
+        return content
 
     def GetPageContent(self, page):
         content = page.read()
@@ -100,6 +116,10 @@ class Yue(object):
         else:
             print '<Unknown charset>'
         return content
+
+    def GetFormData(self, content):
+        self.__stateExtracter.feed(content)
+        return self.__stateExtracter.result
 
 if __name__ == '__main__':
     pass

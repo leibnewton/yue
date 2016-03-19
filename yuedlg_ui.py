@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName(_fromUtf8("Dialog"))
-        Dialog.resize(634, 477)
+        Dialog.resize(635, 477)
         Dialog.setMinimumSize(QtCore.QSize(600, 450))
         self.verticalLayout = QtGui.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
@@ -59,6 +59,14 @@ class Ui_Dialog(object):
         self.htmlBrowser.setSizePolicy(sizePolicy)
         self.htmlBrowser.setObjectName(_fromUtf8("htmlBrowser"))
         self.verticalLayout.addWidget(self.htmlBrowser)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
+        self.chkUseFormData = QtGui.QCheckBox(Dialog)
+        self.chkUseFormData.setObjectName(_fromUtf8("chkUseFormData"))
+        self.horizontalLayout.addWidget(self.chkUseFormData)
+        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
@@ -67,7 +75,8 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle(_translate("Dialog", "Dialog", None))
         self.leUrl.setPlaceholderText(_translate("Dialog", "input URL here", None))
         self.leParam.setPlaceholderText(_translate("Dialog", "Additional params", None))
-        self.pushButton.setText(_translate("Dialog", "PushButton", None))
+        self.pushButton.setText(_translate("Dialog", "Fetch", None))
+        self.chkUseFormData.setText(_translate("Dialog", "Use Form Data", None))
 
 
 if __name__ == "__main__":
