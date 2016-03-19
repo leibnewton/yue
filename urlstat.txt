@@ -27,18 +27,39 @@ http://oa-center.storm/Programs/KQ/EmployeeInfoStatistic.aspx
   btnSearch=查询
 信息详细
 http://oa-center.storm/Programs/KQ/EmployeeInfoDetail.aspx
+  刷卡信息：InfoSelect=RadioButtonPUNCH_CARD_INFO
+  请假信息：InfoSelect=RadioButtonLEAVE_INFO
+  加班信息：InfoSelect=RadioButtonOVERTIME_INFO
+  出差信息：InfoSelect=RadioButtonBUSINESSTRIP
+  外出信息：InfoSelect=RadioButtonOUT_INFO
+  ---------------------
+  本月：TimeSelect=RadioButtonTHIS_MONTH
+  本日：TimeSelect=RadioButtonTHIS_DAY
+  上日：TimeSelect=RadioButtonPREV_DAY
 
 加班申请
 http://oa-center.storm/Programs/KQ/EmployeeRequestOvertime.aspx
 记录查找
 EmployeeRequestOvertime.aspx
 
-
+_______________________________________
 example:
-http://oa-center.storm/Programs/KQ/EmployeeInfoStatistic.aspx
+1. http://oa-center.storm/Programs/KQ/EmployeeInfoStatistic.aspx
 error:
 {'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonDATE_SELECT','TextBoxDATE_FROM':'2016-01-01','TextBoxDATE_TO':'2016-02-20','CheckBoxNORMAL_NOT_TO_SEE':'off','btnSearch':'查询'}
 
 ok:
-{'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonDATE_SELECT','TextBoxDATE_FROM':'2016-01-01','TextBoxDATE_TO':'2016-02-20','btnSearch':'查询'}
+{'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonDATE_SELECT','TextBoxDATE_FROM':'2016-03-01','TextBoxDATE_TO':'2016-03-20','btnSearch':'查询'}
+{'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonDATE_SELECT','TextBoxDATE_FROM':'2016-02-01','TextBoxDATE_TO':'2016-02-20'}
+
+_________________
+2. http://oa-center.storm/Programs/KQ/EmployeeInfoDetail.aspx
+{'InfoSelect':'RadioButtonOVERTIME_INFO','TimeSelect':'RadioButtonTHIS_MONTH'}
+{'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonPREV_MONTH'}
+{'InfoSelect':'RadioButtonPUNCH_CARD_INFO','TimeSelect':'RadioButtonDATE_SELECT','TextBoxDATE_FROM':'2016-02-01','TextBoxDATE_TO':'2016-02-20'}
+
+
+_________________
+3. 
+
 
