@@ -73,7 +73,12 @@ bad:
   {'RecordSelect':'RadioButtonPOST', 'btnPrev':''}
 ok:
   {'btnQuery':''}
+ <<以下需要回传__VIEWSTATE等信息>>
   {'RecordSelect':'RadioButtonPOST','btnQuery':''}
   {'btnPrev':''}
   {'btnNext':''}
 
+  {'RecordSelect':'RadioButtonALL','btnQuery':'','TextBoxDATE_FROM_SEARCH':'2016-02-01','TextBoxDATE_TO_SEARCH':'2016-02-20'}
+  
+  
+  
