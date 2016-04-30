@@ -48,6 +48,18 @@ class Yue(object):
       content = self._Post(loginPage, values)
       return content
 
+    def GetKQ(self, dateFrom, dateTo):
+        url = '/Programs/KQ/EmployeeInfoStatistic.aspx'
+        data = {'InfoSelect': 'RadioButtonPUNCH_CARD_INFO',
+                'TimeSelect': 'RadioButtonDATE_SELECT',
+                'TextBoxDATE_FROM': dateFrom,
+                'TextBoxDATE_TO': dateTo}
+        print '-------------PAYLOAD----------------'
+        print data
+        print '------------------------------------'
+        content = self.Fetch(url, data)
+        return content
+
     def IsLoginSucceed(self, content):
         return 'MainWindow.aspx' in content
 
