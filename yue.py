@@ -34,6 +34,7 @@ class StateExtracter(HTMLParser.HTMLParser):
 class Yue(object):
     ORIGIN = 'http://172.26.10.41' #"http://oa-center.storm"  #
     ViewStates = {}
+    Debug = False
 
     def __init__(self):
         self.__stateExtracter = StateExtracter()
@@ -54,9 +55,10 @@ class Yue(object):
                 'TimeSelect': 'RadioButtonDATE_SELECT',
                 'TextBoxDATE_FROM': dateFrom,
                 'TextBoxDATE_TO': dateTo}
-        print '-------------PAYLOAD----------------'
-        print data
-        print '------------------------------------'
+        if Yue.Debug:
+            print '-------------PAYLOAD----------------'
+            print data
+            print '------------------------------------'
         content = self.Fetch(url, data)
         return content
 
@@ -79,7 +81,7 @@ class Yue(object):
         if value:
             origlen = len(Yue.ViewStates.get(stateKey, ''))
             Yue.ViewStates[stateKey] = value
-            print '%s viewstate: %d -> %d' % (stateKey, origlen, len(value))
+            if Yue.Debug: print '%s viewstate: %d -> %d' % (stateKey, origlen, len(value))
 
     def RegulateUrl(self, url):
         o = urlparse(url)
@@ -126,7 +128,7 @@ class Yue(object):
         if charset:
             content = content.decode(charset) #content = QtCore.QString.fromUtf8(content)
         else:
-            print '<Unknown charset>'
+            if Yue.Debug: print '<Unknown charset>'
         return content
 
     def GetFormData(self, content):

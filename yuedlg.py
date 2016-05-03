@@ -16,6 +16,7 @@ class YueDlg(QtGui.QDialog, yuedlg_ui.Ui_Dialog):
 
         self.htmlBrowser.setOpenExternalLinks(True)
         self.yue = yue.Yue()
+        yue.Yue.Debug = True
         content = self.yue.Login('2797', 'venus190597')
         if self.yue.IsLoginSucceed(content):
             self.assignText('<h2><font color="green">Login Successfully.</font></h2>')
