@@ -5,6 +5,7 @@ Created on Sat Apr 30 17:08:00 2016
 @author: navicloud
 """
 
+from datetime import datetime, time
 from PyQt4 import QtGui, QtCore
 import bs4
 import yuetool_ui
@@ -28,18 +29,34 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
             dateFrom = str(self.dateStart.date().toString("yyyy-MM-dd"))
             dateTo = str(self.dateEnd.date().toString("yyyy-MM-dd"))
             content = self.yue.GetKQ(dateFrom, dateTo)
-            # hide uninterested columns from table here
             bdom = bs4.BeautifulSoup(content, 'lxml')
+
+            # add style to hide uninterested columns from table here
             style = bdom.new_tag('style')
             style.append(self.hideColumns([3,6,7,8,9]))
             bdom.head.append(style)
+
             # remove contents except table
             body = bdom.body
             table = body.table.extract()
             body.clear()
             body.append(table)
+
             # remove rows in table if not overwork
-            #...
+            tds = table.select('td')
+            for i in range(len(tds)/9):
+                tstr = tds[9*i+4].text.strip()
+                if tstr:
+                    dstr = tds[9*i].text.strip()
+                    dtstr = '%s %s'%(dstr, tstr)
+                    dt = datetime.strptime(dtstr, '%Y-%m-%d %H:%M:%S')
+                    ltime = time(8, 0)
+                    rtime = self.timeRef.time().toPyTime()
+                    if dt.weekday() <= 5 and not ltime<dt.time()<rtime: #weekday and over work
+                        continue
+                if yue.Yue.Debug: print 'remove', i, 'row', tstr
+                tds[9*i].parent.decompose()
+
             content = bdom.prettify()
             self.webView.setHtml(content)
 
