@@ -50,6 +50,7 @@ class Yue(object):
       return content
 
     def GetKQ(self, dateFrom, dateTo):
+        '''dateFrom & dateTo are strings in yyyy-mm-dd format'''
         url = '/Programs/KQ/EmployeeInfoStatistic.aspx'
         data = {'InfoSelect': 'RadioButtonPUNCH_CARD_INFO',
                 'TimeSelect': 'RadioButtonDATE_SELECT',
@@ -61,6 +62,51 @@ class Yue(object):
             print '------------------------------------'
         content = self.Fetch(url, data)
         return content
+
+    def GetJBSQ(self, dateFrom, dateTo):
+        '''return a dict:date to info.
+        dateFrom & dateTo are strings in yyyy-mm-dd format'''
+        url = '/Programs/KQ/EmployeeRequestOvertime.aspx'
+        formdata = {'btnQuery':''}
+        content = self.Fetch(url, formdata) #记录查找
+
+        formdata = self.GetFormData(content)
+        formdata['RecordSelect'] = 'RadioButtonALL'
+        formdata['TextBoxDATE_FROM_SEARCH'] = dateFrom
+        formdata['TextBoxDATE_TO_SEARCH'] = dateTo
+        formdata['btnQuery'] = ''
+        content = self.Fetch(url, formdata) #查找指定范围内所有记录
+
+        formdata = self.GetFormData(content)
+        jbsq = {'':['----', '----', '----', '']}
+        count = 0
+        while True:
+            bdom = bs4.BeautifulSoup(content, 'lxml')
+            total = bdom.select_one('#lblMsg')
+            totalparts = total.text.split()
+            if len(totalparts) == 1:
+                if Yue.Debug: print 'no records in specified date range'
+                break
+            count = int(totalparts[1])
+            table = bdom.select_one('#GridViewLINE')
+            tds = table.select('td')
+            key = tds[0].text.strip()  #起始日期
+            values = []
+            values.append(tds[2].text.strip())  #起始时间
+            values.append(tds[3].text.strip())  #终止时间
+            status = bdom.select_one('#LabelFLAG_VALUE')
+            reason = bdom.select_one('#TextBoxREASON')
+            values.append(status.text)     #当前状态
+            values.append(reason['value']) #加班事由
+            jbsq[key] = values
+            btnPrev   = bdom.select_one('#btnPrev')
+            if 'disabled' in btnPrev.attrs:
+                if Yue.Debug: print 'no more records'
+                break
+            formdata['btnPrev'] = ''
+            content  = self.Fetch(url, formdata) #获取下条记录
+            formdata = self.GetFormData(content)
+        return jbsq
 
     def IsLoginSucceed(self, content):
         return 'MainWindow.aspx' in content
@@ -132,6 +178,7 @@ class Yue(object):
         return content
 
     def GetFormData(self, content):
+        '''extract form data except buttons'''
         self.__stateExtracter.feed(content)
         return self.__stateExtracter.result
 
