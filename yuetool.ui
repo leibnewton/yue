@@ -31,14 +31,24 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout">
+       <widget class="QRadioButton" name="rbApplication">
+        <property name="text">
+         <string>Application</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
          <widget class="QRadioButton" name="rbOffDuty">
           <property name="text">
            <string>Excel</string>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -169,6 +179,48 @@
     </widget>
    </item>
    <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QComboBox" name="cmbType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>1</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cmbReason">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>2</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbApply">
+        <property name="text">
+         <string>申请</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <spacer name="horizontalSpacer_2">
@@ -229,12 +281,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>62</x>
-     <y>80</y>
+     <x>86</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
-     <x>128</x>
-     <y>74</y>
+     <x>175</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
@@ -245,12 +297,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>63</x>
-     <y>82</y>
+     <x>86</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
-     <x>300</x>
-     <y>86</y>
+     <x>278</x>
+     <y>112</y>
     </hint>
    </hints>
   </connection>
@@ -261,12 +313,28 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>72</x>
-     <y>80</y>
+     <x>86</x>
+     <y>110</y>
     </hint>
     <hint type="destinationlabel">
-     <x>395</x>
-     <y>86</y>
+     <x>361</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbApplication</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>frame</receiver>
+   <slot>setShown(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>63</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>51</x>
+     <y>545</y>
     </hint>
    </hints>
   </connection>

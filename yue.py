@@ -72,8 +72,8 @@ class Yue(object):
 
         formdata = self.GetFormData(content)
         formdata['RecordSelect'] = 'RadioButtonALL'
-        formdata['TextBoxDATE_FROM_SEARCH'] = dateFrom
-        formdata['TextBoxDATE_TO_SEARCH'] = dateTo
+        #formdata['TextBoxDATE_FROM_SEARCH'] = dateFrom
+        #formdata['TextBoxDATE_TO_SEARCH'] = dateTo
         formdata['btnQuery'] = ''
         content = self.Fetch(url, formdata) #查找指定范围内所有记录
 
@@ -102,6 +102,9 @@ class Yue(object):
             btnPrev   = bdom.select_one('#btnPrev')
             if 'disabled' in btnPrev.attrs:
                 if Yue.Debug: print 'no more records'
+                break
+            if key < dateFrom:
+                if Yue.Debug: print 'got one more[%s] than %s, done' % (key, dateFrom)
                 break
             formdata['btnPrev'] = ''
             content  = self.Fetch(url, formdata) #获取下条记录
