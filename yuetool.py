@@ -32,6 +32,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
         self.cmbType.addItems([u'智能判断', u'平日加班', u'双休日加班'])
         self.yue = yue.Yue()
         yue.Yue.Debug = True
+        self.waitToApply = {}
         self.on_rbApplication_toggled(True)
 
     def hideColumns(self, cols):
@@ -64,11 +65,11 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
     @QtCore.pyqtSignature('bool')
     def on_rbApplication_toggled(self, checked):
         if checked:
-            self.waitToApply = {}
-            self.pbApply.setEnabled(False)
+            self.pbApply.setEnabled(True if self.waitToApply else False)
 
     @QtCore.pyqtSignature('')
     def on_pbRefresh_clicked(self):
+        self.waitToApply = {}
         if self.rbOffDuty.isChecked():
             dateFrom = str(self.dateStart.date().toString("yyyy-MM-dd"))
             dateTo = str(self.dateEnd.date().toString("yyyy-MM-dd"))
@@ -134,7 +135,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
 
             chkbox = bdom.new_tag('input')
             chkbox['type'] = 'checkbox'
-            chkbox['checked'] = 'checked'
+            #chkbox['checked'] = 'checked'
             tds = table.select('td')
             for i in range(len(tds)/9):
                 row = tds[9*i].parent
@@ -162,7 +163,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
                         continue
                 if yue.Yue.Debug: print 'remove', i, 'row', s_dtend if s_tstart else s_dstart
                 row.decompose()
-            self.pbApply.setEnabled(True)
+            self.on_rbApplication_toggled(True)
 
         content = bdom.prettify()
         self.webView.setHtml(content)
