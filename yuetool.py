@@ -7,6 +7,7 @@ Created on Sat Apr 30 17:08:00 2016
 
 from datetime import datetime, time, date
 from dateutil.relativedelta import relativedelta
+from time import sleep
 import copy
 from PyQt4 import QtGui, QtCore
 import bs4
@@ -28,11 +29,10 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
     def __init__(self, parent = None):
         super(YueTool, self).__init__(parent)
         self.setupUi(self)
-        self.cmbType.addItem(u'智能判断')
-        self.cmbType.addItem(u'平日加班')
-        self.cmbType.addItem(u'双休日加班')
+        self.cmbType.addItems([u'智能判断', u'平日加班', u'双休日加班'])
         self.yue = yue.Yue()
         yue.Yue.Debug = True
+        self.on_rbApplication_toggled(True)
 
     def hideColumns(self, cols):
         # cols: column indexes start from 1
@@ -60,6 +60,12 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
         chknew['key'] = key
         tdnew.append(chknew)
         row.append(tdnew)
+
+    @QtCore.pyqtSignature('bool')
+    def on_rbApplication_toggled(self, checked):
+        if checked:
+            self.waitToApply = {}
+            self.pbApply.setEnabled(False)
 
     @QtCore.pyqtSignature('')
     def on_pbRefresh_clicked(self):
@@ -102,7 +108,9 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
             start = date(start.year, start.month, 1)
             dateFrom = start.strftime('%Y-%m-%d')
             dateTo   = today.strftime('%Y-%m-%d')
-            jbsq = self.yue.GetJBSQ(dateFrom, dateTo)
+            jbsq, reasons = self.yue.GetJBSQ(dateFrom, dateTo)
+            if reasons:
+                self.cmbReason.addItems(reasons)
 
             content = self.yue.GetKQ(dateFrom, dateTo)
             bdom = bs4.BeautifulSoup(content, 'lxml')
@@ -150,9 +158,11 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
                         else:
                             self.addCells(row, tds[9*i], jbsq[''][:3])
                             self.addCheckBox(row, tds[9*i], chkbox, s_dstart)
+                            self.waitToApply[s_dstart] = (dtstart, dtend)
                         continue
                 if yue.Yue.Debug: print 'remove', i, 'row', s_dtend if s_tstart else s_dstart
                 row.decompose()
+            self.pbApply.setEnabled(True)
 
         content = bdom.prettify()
         self.webView.setHtml(content)
@@ -162,7 +172,16 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
         frame = self.webView.page().mainFrame()
         result = frame.evaluateJavaScript('getSelected()')
         selected = str(result.toString()).split(',')
-        print selected
+        if yue.Yue.Debug: print selected
+        reason = unicode(self.cmbReason.currentText())
+        strategy = self.cmbType.currentIndex()
+        leftcnt = len(selected) - 1
+        for item in selected:
+            dates = self.waitToApply[item]
+            if self.yue.AddJBSQ(dates[0], dates[1], reason, strategy) and leftcnt > 0:
+                sleep(1.0)
+                leftcnt -= 1
+        self.on_pbRefresh_clicked()
 
     def showEvent(self, event):
         with open('passwd', 'r') as f:

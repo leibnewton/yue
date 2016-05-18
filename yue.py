@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 # -*- coding:utf-8 -*-
 
+from datetime import datetime, time, date
+from dateutil.relativedelta import relativedelta
 import cookielib, urllib, urllib2
 import bs4, HTMLParser
 from urlparse import urlparse, urljoin
@@ -38,6 +40,7 @@ class Yue(object):
 
     def __init__(self):
         self.__stateExtracter = StateExtracter()
+        self.charset = ''
         cookiejar = cookielib.CookieJar()
         self.urlOpener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
 
@@ -73,12 +76,13 @@ class Yue(object):
         formdata = self.GetFormData(content)
         formdata['RecordSelect'] = 'RadioButtonALL'
         #formdata['TextBoxDATE_FROM_SEARCH'] = dateFrom
-        #formdata['TextBoxDATE_TO_SEARCH'] = dateTo
+        formdata['TextBoxDATE_TO_SEARCH'] = dateTo
         formdata['btnQuery'] = ''
         content = self.Fetch(url, formdata) #查找指定范围内所有记录
 
         formdata = self.GetFormData(content)
-        jbsq = {'':['----', '----', '----', '']}
+        jbsq     = {'':['----', '----', '----']}
+        reasons   = []
         count = 0
         while True:
             bdom = bs4.BeautifulSoup(content, 'lxml')
@@ -87,7 +91,7 @@ class Yue(object):
             if len(totalparts) == 1:
                 if Yue.Debug: print 'no records in specified date range'
                 break
-            count = int(totalparts[1])
+            #count = int(totalparts[1])
             table = bdom.select_one('#GridViewLINE')
             tds = table.select('td')
             key = tds[0].text.strip()  #起始日期
@@ -95,10 +99,14 @@ class Yue(object):
             values.append(tds[2].text.strip())  #起始时间
             values.append(tds[3].text.strip())  #终止时间
             status = bdom.select_one('#LabelFLAG_VALUE')
-            reason = bdom.select_one('#TextBoxREASON')
             values.append(status.text)     #当前状态
-            values.append(reason['value']) #加班事由
             jbsq[key] = values
+
+            reason = bdom.select_one('#TextBoxREASON')
+            rstext = reason['value']       #加班事由
+            if rstext not in reasons:
+                reasons.append(rstext)
+
             btnPrev   = bdom.select_one('#btnPrev')
             if 'disabled' in btnPrev.attrs:
                 if Yue.Debug: print 'no more records'
@@ -109,7 +117,42 @@ class Yue(object):
             formdata['btnPrev'] = ''
             content  = self.Fetch(url, formdata) #获取下条记录
             formdata = self.GetFormData(content)
-        return jbsq
+        return (jbsq, reasons)
+
+    def AddJBSQ(self, dtstart, dtend, reason, strategy):
+        '''dtstart & dtend are datetimes.
+        strategy:
+          0 ---- auto
+          1 ---- weekday
+          2 ---- weekend'''
+        hours = 0
+        if strategy == 1 or (strategy == 0 and dtstart.weekday() < 5):
+            hours = 9.5
+            if dtstart.time() > time(13, 30, 59):
+                return False
+            elif dtstart.time() > time(10, 0, 59):
+                hours = 0
+                dtstart = dtstart.replace(hour=18, minute=30, second=0, microsecond=0)
+        dtstart += relativedelta(hours=hours)
+        if dtstart > dtend:
+            return False
+        dtstart = dtstart.replace(minute=30 if dtstart.minute >= 30 else 0)
+        dtend  += relativedelta(minutes=29, seconds=59)
+        dtend   = dtend.replace(minute=30 if dtend.minute >= 30 else 0)
+        formdata = {}
+        formdata['btnAddLine']    = ''
+        formdata['TextBoxREASON'] = reason.encode(self.charset if self.charset else 'utf-8')
+        formdata['TextBoxDATE_FROM']      = dtstart.strftime('%Y-%m-%d')
+        formdata['DropDownListTIME_FROM'] = dtstart.strftime('%H:%M')
+        formdata['TextBoxDATE_TO']        = dtend.strftime('%Y-%m-%d')
+        formdata['DropDownListTIME_TO']   = dtend.strftime('%H:%M')
+        if Yue.Debug: print formdata
+        url = '/Programs/KQ/EmployeeRequestOvertime.aspx'
+        content = self.Fetch(url, formdata)
+        formdata = self.GetFormData(content)
+        formdata['btnPost'] = ''
+        content = self.Fetch(url, formdata)
+        return True
 
     def IsLoginSucceed(self, content):
         return 'MainWindow.aspx' in content
@@ -176,6 +219,9 @@ class Yue(object):
         #print charset
         if charset:
             content = content.decode(charset) #content = QtCore.QString.fromUtf8(content)
+            if not self.charset:
+                self.charset = charset
+                if Yue.Debug: print 'determine charset: ', self.charset
         else:
             if Yue.Debug: print '<Unknown charset>'
         return content
