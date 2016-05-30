@@ -139,15 +139,14 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
             tds = table.select('td')
             for i in range(len(tds)/9):
                 row = tds[9*i].parent
-                s_tstart = tds[9*i+3].text.strip()
                 s_dstart = tds[9*i].text.strip()
-                if s_tstart:
-                    s_dtstart  = '%s %s'%(s_dstart, s_tstart)
-                    dtstart    = datetime.strptime(s_dtstart, '%Y-%m-%d %H:%M:%S')
-
-                    s_tend  = tds[9*i+4].text.strip()
-                    s_dend  = s_dstart
-                    s_dtend = '%s %s'%(s_dend, s_tend)
+                s_tstart = tds[9*i+3].text.strip()
+                s_dtstart= '%s %s'%(s_dstart, s_tstart)
+                s_dend   = s_dstart
+                s_tend   = tds[9*i+4].text.strip()
+                s_dtend  = '%s %s'%(s_dend, s_tend)
+                if s_tstart and s_tend:
+                    dtstart = datetime.strptime(s_dtstart, '%Y-%m-%d %H:%M:%S')
                     dtend   = datetime.strptime(s_dtend, '%Y-%m-%d %H:%M:%S')
                     if dtend < dtstart:
                         dtend  = dtend + relativedelta(days=1)
@@ -161,7 +160,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
                             self.addCheckBox(row, tds[9*i], chkbox, s_dstart)
                             self.waitToApply[s_dstart] = (dtstart, dtend)
                         continue
-                if yue.Yue.Debug: print 'remove', i, 'row', s_dtend if s_tstart else s_dstart
+                if yue.Yue.Debug: print 'remove', i, 'row', s_dtend if s_tend else s_dtstart
                 row.decompose()
             self.on_rbApplication_toggled(True)
 
