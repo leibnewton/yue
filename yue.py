@@ -33,16 +33,24 @@ class StateExtracter(HTMLParser.HTMLParser):
     def result(self): # provide shallow copy
         return dict(self.__result)
 
+def DateStrAdd(dateStr, deltaDay):
+    theDate  = datetime.strptime(dateStr, '%Y-%m-%d')
+    theDate += relativedelta(days=deltaDay)
+    return theDate.strftime('%Y-%m-%d')
+
 class Yue(object):
     ORIGIN = 'http://172.26.10.41' #"http://oa-center.storm"  #
     ViewStates = {}
     Debug = False
+    EMPTYJBSQ = ['----', '----', '----']
 
     def __init__(self):
         self.__stateExtracter = StateExtracter()
         self.charset = ''
         cookiejar = cookielib.CookieJar()
         self.urlOpener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookiejar))
+        self.jbsq      = {}
+        self.reasons   = []
 
     def Login(self,usr,pwd):
       loginPage = urljoin(Yue.ORIGIN, "/Programs/login/login.aspx")
@@ -72,7 +80,21 @@ class Yue(object):
         url = '/Programs/KQ/EmployeeRequestOvertime.aspx'
         formdata = {'btnQuery':''}
         content = self.Fetch(url, formdata) #记录查找
-
+        
+        exactFrom = False
+        if self.jbsq:
+            exactFrom = True
+            keys = self.jbsq.keys()
+            maxkey = DateStrAdd(max(keys), 1)
+            minkey = DateStrAdd(min(keys), -1)
+            if dateTo >= maxkey:
+                dateFrom = max(dateFrom, maxkey)
+            elif dateFrom <= minkey:
+                dateTo = min(dateTo, minkey)
+            else:
+                return (self.jbsq, self.reasons)
+        if Yue.Debug: print 'Append JBSQ in [%s,%s]' % (dateFrom, dateTo)
+        
         formdata = self.GetFormData(content)
         formdata['RecordSelect'] = 'RadioButtonALL'
         #formdata['TextBoxDATE_FROM_SEARCH'] = dateFrom
@@ -81,8 +103,6 @@ class Yue(object):
         content = self.Fetch(url, formdata) #查找指定范围内所有记录
 
         formdata = self.GetFormData(content)
-        jbsq     = {'':['----', '----', '----']}
-        reasons   = []
         count = 0
         while True:
             bdom = bs4.BeautifulSoup(content, 'lxml')
@@ -100,24 +120,27 @@ class Yue(object):
             values.append(tds[3].text.strip())  #终止时间
             status = bdom.select_one('#LabelFLAG_VALUE')
             values.append(status.text)     #当前状态
-            jbsq[key] = values
+            self.jbsq[key] = values
 
             reason = bdom.select_one('#TextBoxREASON')
             rstext = reason['value']       #加班事由
-            if rstext not in reasons:
-                reasons.append(rstext)
+            if rstext not in self.reasons:
+                self.reasons.append(rstext)
 
             btnPrev   = bdom.select_one('#btnPrev')
             if 'disabled' in btnPrev.attrs:
                 if Yue.Debug: print 'no more records'
                 break
-            if key < dateFrom:
+            if exactFrom and key == dateFrom:
+                if Yue.Debug: print 'reach [%s],  done' % dateFrom
+                break
+            elif key < dateFrom:
                 if Yue.Debug: print 'got one more[%s] than %s, done' % (key, dateFrom)
                 break
             formdata['btnPrev'] = ''
             content  = self.Fetch(url, formdata) #获取下条记录
             formdata = self.GetFormData(content)
-        return (jbsq, reasons)
+        return (self.jbsq, self.reasons)
 
     def AddJBSQ(self, dtstart, dtend, reason, strategy):
         '''dtstart & dtend are datetimes.

@@ -154,9 +154,9 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
                     if dtstart.weekday() >= 5 or dtend > dtstart + relativedelta(hours=9.6): #weekend or normal work
                         # add data columns: start, end, status, checkbox
                         if s_dstart in jbsq:
-                            self.addCells(row, tds[9*i], jbsq[s_dstart][:3]+[''])
+                            self.addCells(row, tds[9*i], jbsq[s_dstart]+[''])
                         else:
-                            self.addCells(row, tds[9*i], jbsq[''][:3])
+                            self.addCells(row, tds[9*i], yue.Yue.EMPTYJBSQ)
                             self.addCheckBox(row, tds[9*i], chkbox, s_dstart)
                             self.waitToApply[s_dstart] = (dtstart, dtend)
                         continue
