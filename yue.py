@@ -22,7 +22,7 @@ class StateExtracter(HTMLParser.HTMLParser):
         if tag == 'input':
             dattrs = dict(attrs)
             try:
-                if dattrs['type'] not in ('submit', 'button'):
+                if dattrs['type'] == 'hidden': #dattrs['type'] not in ('submit', 'button'):
                     self.__result[str(dattrs['name'])] = str(dattrs['value']) #filter not ascii
             except: pass
 
@@ -185,9 +185,7 @@ class Yue(object):
         if not Yue.ViewStates.has_key(stateKey):
             content = self._Open(url)
             self.UpdateViewState(url, content)
-        value = Yue.ViewStates[stateKey]
-        if value: # set VIEWSTATE
-            data[StateExtracter.VIEWSTATE] = value
+        data.update(Yue.ViewStates[stateKey])
 
     def UpdateViewState(self, url, content):
         self.__stateExtracter.feed(content)
@@ -195,7 +193,7 @@ class Yue(object):
         value = self.__stateExtracter.GetResult(StateExtracter.VIEWSTATE)
         if value:
             origlen = len(Yue.ViewStates.get(stateKey, ''))
-            Yue.ViewStates[stateKey] = value
+            Yue.ViewStates[stateKey] = self.__stateExtracter.result
             if Yue.Debug: print '%s viewstate: %d -> %d' % (stateKey, origlen, len(value))
 
     def RegulateUrl(self, url):
@@ -228,7 +226,14 @@ class Yue(object):
         request.add_header('Origin',  Yue.ORIGIN)
         #request.add_header('Accept-Encoding', 'gzip, deflate')
         #request.add_header('Accept-Language', 'zh-CN,zh;q=0.8')
-        page = self.urlOpener.open(request)  # Our cookiejar automatically receives the cookies
+        try:
+            page = self.urlOpener.open(request)  # Our cookiejar automatically receives the cookies
+        except Exception, e:
+            if Yue.Debug:
+                print 'url: ',     request.get_full_url()
+                print 'headers: ', request.headers
+                print 'data: ',    request.data
+            raise e
         content = self.GetPageContent(page)
         #self.UpdateViewState(url, content)
         return content
