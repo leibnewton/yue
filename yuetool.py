@@ -52,6 +52,8 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
         for value in values:
             tdnew = copy.copy(td)
             tdnew.string = value
+            if value == u'已经批准':
+              tdnew['style'] += ';color:green;'
             row.append(tdnew)
 
     def addCheckBox(self, row, td, chkbox, key):
