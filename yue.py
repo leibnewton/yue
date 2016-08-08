@@ -167,7 +167,7 @@ class Yue(object):
         formdata['TextBoxREASON'] = reason.encode(self.charset if self.charset else 'utf-8')
         formdata['TextBoxDATE_FROM']      = dtstart.strftime('%Y-%m-%d')
         formdata['DropDownListTIME_FROM'] = dtstart.strftime('%H:%M')
-        formdata['TextBoxDATE_TO']        = dtend.strftime('%Y-%m-%d')
+        formdata['TextBoxDATE_TO']        = formdata['TextBoxDATE_FROM'] #dtend.strftime('%Y-%m-%d')
         formdata['DropDownListTIME_TO']   = dtend.strftime('%H:%M')
         if Yue.Debug: print formdata
         url = '/Programs/KQ/EmployeeRequestOvertime.aspx'

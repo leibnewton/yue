@@ -153,7 +153,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
                         s_dend = dtend.strftime('%Y-%m-%d')
                     if dtstart.weekday() >= 5 or dtend > dtstart + relativedelta(hours=9.6): #weekend or normal work
                         # add data columns: start, end, status, checkbox
-                        if s_dstart in jbsq:
+                        if s_dstart in jbsq: # and jbsq[s_dstart][2] != u'退回':
                             self.addCells(row, tds[9*i], jbsq[s_dstart]+[''])
                         else:
                             self.addCells(row, tds[9*i], yue.Yue.EMPTYJBSQ)
