@@ -113,6 +113,7 @@ class YueTool(QtGui.QDialog, yuetool_ui.Ui_Dialog):
             dateTo   = today.strftime('%Y-%m-%d')
             jbsq, reasons = self.yue.GetJBSQ(dateFrom, dateTo)
             if reasons:
+                self.cmbReason.clear()
                 self.cmbReason.addItems(reasons)
 
             content = self.yue.GetKQ(dateFrom, dateTo)
